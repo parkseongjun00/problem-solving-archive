@@ -6,7 +6,7 @@ class Program
   {
     string[] inputs = Console.ReadLine().Split(' ');
     int n = int.Parse(inputs[0]); //전체 회사의 개수
-    int m = int.Parse(inputs[1]); //전체 경로의 개수
+    int m = int.Parse(inputs[1]); //전체 경로의 개수 
     const int INF = 1000001;
     int[,] graph = new int[n + 1, n + 1]; //행부터 열까지 가는 거리를 의미
 
