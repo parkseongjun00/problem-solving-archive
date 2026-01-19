@@ -59,7 +59,7 @@ class Program
           Console.WriteLine($"{i} 값이 들어갔습니다!: {curDist} + {graph[current, i]} < {dist[i]} 라서요!");
           Console.WriteLine($"참고로 current: {current}, i: {i} 입니다!");
           dist[i] = curDist + graph[current, i];
-          priorityQueue.Enqueue(i, graph[current, i]);
+          priorityQueue.Enqueue(i, dist[i]);
         }
       }
     }
