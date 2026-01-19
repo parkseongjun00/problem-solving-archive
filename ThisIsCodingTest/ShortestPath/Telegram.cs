@@ -48,8 +48,14 @@ class Program
 
     while (priorityQueue.Count != 0)
     {
-      var current = priorityQueue.Dequeue();
-      var curDist = dist[current];
+      
+      priorityQueue.TryDequeue(out int current, out int curDist);
+
+      if (dist[current] < curDist)
+      {
+        continue;
+      }
+      
       Console.WriteLine($"안녕하세요~ current는 {current}이고, curDist는 {curDist}입니다!");
 
       for (int i = 1; i < n + 1; i++)
@@ -59,7 +65,7 @@ class Program
           Console.WriteLine($"{i} 값이 들어갔습니다!: {curDist} + {graph[current, i]} < {dist[i]} 라서요!");
           Console.WriteLine($"참고로 current: {current}, i: {i} 입니다!");
           dist[i] = curDist + graph[current, i];
-          priorityQueue.Enqueue(i, dist[i]);
+          priorityQueue.Enqueue(i, graph[current, i]);
         }
       }
     }
