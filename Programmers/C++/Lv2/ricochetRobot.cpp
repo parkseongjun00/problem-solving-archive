@@ -79,6 +79,8 @@ int solution(vector<string> board)
             if (board[i][k] == 'R')
             {
                 queue.push({{ k, i }, 0});
+                // 큐 중복 등록으로 인한 메모리 낭비 및 시간 초과를 막기 위해 push 시점에 즉시 방문 처리
+                visited[next_pos.y][next_pos.x] = true;
                 break;
             }
         }
@@ -112,6 +114,8 @@ int solution(vector<string> board)
             if (!is_visited_pos(visited, next_pos))
             {
                 queue.push({next_pos, cost + 1});
+                // 큐 중복 등록으로 인한 메모리 낭비 및 시간 초과를 막기 위해 push 시점에 즉시 방문 처리
+                visited[next_pos.y][next_pos.x] = true;
             }
         }
     }
