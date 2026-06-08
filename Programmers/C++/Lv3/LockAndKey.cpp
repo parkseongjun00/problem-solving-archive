@@ -31,7 +31,7 @@ struct Pos
     }
 };
 
-vector<Pos> get_relative_poses(const vector<Pos>& pos_list, const Pos& origin);
+void get_relative_poses(vector<Pos>& pos_list, const Pos& origin);
 void rotate_clockwise(vector<Pos>& list);
 void Move(vector<Pos>& list, const Pos& delta);
 
@@ -39,9 +39,9 @@ bool solution(vector<vector<int>> key, vector<vector<int>> lock)
 {
     bool answer = true;
     
-    vector<Pos> key_pos_list;
-    vector<Pos> lock_pos_list;
-    vector<Pos> lock_hole_list;
+    vector<Pos> key_pos_list;   // 열쇠 돌기
+    vector<Pos> lock_pos_list;  // 자물쇠 돌기
+    vector<Pos> lock_hole_list; // 자물쇠 홈
     
     // key_pos_list 초기화
     for (int i = 0; i < key.size(); i++)
@@ -72,22 +72,19 @@ bool solution(vector<vector<int>> key, vector<vector<int>> lock)
     }
     
     // 해볼 가치도 없음
+    // 열쇠 저 멀리 던지면 됨
     if (lock_hole_list.size() == 0)
     {
         return true;
     }
-    
-    // key_pos_list의 상대좌표 얻기
-    // 이때 원점은 0번째 요소
-    vector<Pos> relative = get_relative_poses(key_pos_list, key_pos_list[0]);
-    
+     
     // key_pos_list를 순회하면서 각 요소가 원점이 되어 
     // lock_pos_list[0]에 위치시키고, 4방향 회전시키고, 유효한지 확인
-    // Lock의 모든 홈을 채웠는가? key와 lock 간 겹치는 게 없는가?
+    // 유효 조건: Lock의 모든 홈을 채웠는가? && key와 lock 간 겹치는 게 없는가?
     for (int i = 0; i < key_pos_list.size(); i++)
     {
         Pos now = key_pos_list[i];
-        vector<Pos> now_list = get_relative_poses(key_pos_list, now);
+        get_relative_poses(key_pos_list, now);
         
         for (int rotate_count = 0; rotate_count < 4; rotate_count++)
         {
@@ -95,47 +92,44 @@ bool solution(vector<vector<int>> key, vector<vector<int>> lock)
             // 변환 누적 방지
             if (0 < rotate_count)
             {
-                Move(now_list, { -lock_hole_list[0].x, -lock_hole_list[0].y });
+                Move(key_pos_list, { -lock_hole_list[0].x, -lock_hole_list[0].y });
             }
             
-            rotate_clockwise(now_list);
-            Move(now_list, lock_hole_list[0]);
+            rotate_clockwise(key_pos_list);
+            Move(key_pos_list, lock_hole_list[0]);
             
             // 유효성 검사
-            // Lock의 모든 홈을 채웠는가?
-            int left = lock_hole_list.size();
+            bool isInvalid = false;
+            // 1. Lock의 모든 홈을 채웠는가?
             for (int k = 0; k < lock_hole_list.size(); k++)
             {
                 Pos target = lock_hole_list[k];
                 
-                for (int j = 0; j < now_list.size(); j++)
+                if (find(key_pos_list.begin(), key_pos_list.end(), target) == key_pos_list.end())
                 {
-                    if (target == now_list[j])
-                    {
-                        left -= 1;
-                        break;
-                    }
-                }
-            }
-            
-            if (left != 0)
-            {
-                continue;
-            }
-            // key와 lock 간 겹치는 것이 없는가?
-            bool fail = false;
-            for (int k = 0; k < now_list.size(); k++)
-            {
-                Pos target = now_list[k];
-                
-                if (find(lock_pos_list.begin(), lock_pos_list.end(), target) != lock_pos_list.end())
-                {
-                    fail = true;
+                    isInvalid = true;
                     break;
                 }
             }
             
-            if (!fail)
+            if (isInvalid)
+            {
+                continue;
+            }
+            
+            // 2. key와 lock 간 겹치는 것이 없는가?
+            for (int k = 0; k < key_pos_list.size(); k++)
+            {
+                Pos target = key_pos_list[k];
+                
+                if (find(lock_pos_list.begin(), lock_pos_list.end(), target) != lock_pos_list.end())
+                {
+                    isInvalid = true;
+                    break;
+                }
+            }
+            
+            if (!isInvalid)
             {
                 return true;
             }
@@ -149,16 +143,12 @@ bool solution(vector<vector<int>> key, vector<vector<int>> lock)
 }
 
 // 상대 좌표를 구하는 함수
-vector<Pos> get_relative_poses(const vector<Pos>& pos_list, const Pos& origin)
+void get_relative_poses(vector<Pos>& pos_list, const Pos& origin)
 {
-    vector<Pos> new_list;
-    
     for (int i = 0; i < pos_list.size(); i++)
     {
-        new_list.push_back(pos_list[i] - origin);
+        pos_list[i] = pos_list[i] - origin;
     }
-    
-    return new_list;
 }
 
 // 이거 Gemini의 도움을 구함
